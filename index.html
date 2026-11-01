@@ -1,0 +1,590 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>Найди своё позиционирование</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Manrope:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: one narrow column, step-by-step; marker-yellow highlight is the loud element; topic mix gets its own 4-hue set */
+:root{
+  --bg:#ECEBF2; --card:#FFFFFF; --ink:#17161F; --muted:#5E5B70; --line:#D6D3E2;
+  --accent:#2B45F0; --accent-ink:#FFFFFF; --mark:#FFE45C; --mark-ink:#17161F; --soft:#E2E5FF; --warn:#B4531A;
+  --m1:#2B45F0; --m2:#F2C200; --m3:#18A678; --m4:#E0567A; --m5:#8A84A3;
+  --f-display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --f-body:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121119; --card:#1C1B26; --ink:#F1F0F7; --muted:#A3A0B8; --line:#33313F;
+  --accent:#7D8CFF; --accent-ink:#0E0D15; --mark:#E8CF3F; --mark-ink:#17161F; --soft:#262A4A; --warn:#F0A060;
+  --m1:#7D8CFF; --m2:#E8CF3F; --m3:#3CCB98; --m4:#F07C9A; --m5:#8A84A3; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121119; --card:#1C1B26; --ink:#F1F0F7; --muted:#A3A0B8; --line:#33313F;
+  --accent:#7D8CFF; --accent-ink:#0E0D15; --mark:#E8CF3F; --mark-ink:#17161F; --soft:#262A4A; --warn:#F0A060;
+  --m1:#7D8CFF; --m2:#E8CF3F; --m3:#3CCB98; --m4:#F07C9A; --m5:#8A84A3; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:20px 48px}
+.wrap{max-width:660px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.top{display:flex;flex-direction:column;gap:10px}
+.steplabel{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s ease}
+
+h1,h2{font-family:var(--f-display);font-weight:700;line-height:1.15;margin:0;text-wrap:balance}
+h1{font-size:clamp(28px,7vw,40px)}
+h2{font-size:clamp(21px,5.2vw,27px)}
+h3{font-family:var(--f-display);font-weight:500;font-size:17px;margin:0;line-height:1.3;text-wrap:balance}
+.hl{background:linear-gradient(transparent 55%, var(--mark) 55%);color:inherit;padding:0 .1em}
+p{margin:0}
+.lead{font-size:17px;color:var(--muted)}
+.screen{display:flex;flex-direction:column;gap:18px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field>label,.field>.label{font-weight:700;font-size:16px}
+.hint{font-size:14px;color:var(--muted)}
+input[type=text],textarea{width:100%;font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;outline:none;transition:border-color .15s}
+textarea{min-height:84px;resize:vertical}
+input[type=text]:focus,textarea:focus{border-color:var(--accent)}
+::placeholder{color:var(--muted);opacity:.75}
+
+.pick{display:flex;flex-wrap:wrap;gap:8px}
+.pick label{position:relative}
+.pick input{position:absolute;opacity:0;pointer-events:none}
+.pick span{display:inline-block;padding:8px 14px;border-radius:99px;border:1.5px solid var(--line);background:var(--card);cursor:pointer;font-size:15px;transition:background .12s,border-color .12s}
+.pick span:hover{border-color:var(--accent)}
+.pick input:checked+span{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.pick input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+
+.nav{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;padding-top:4px}
+button,.btn{font:inherit;cursor:pointer;border-radius:12px;padding:13px 20px;font-weight:700;border:1.5px solid transparent;text-decoration:none;display:inline-block;text-align:center}
+button:focus-visible,.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:disabled{opacity:.5;cursor:default}
+.primary{background:var(--accent);color:var(--accent-ink)}
+.primary:hover:not(:disabled){filter:brightness(1.08)}
+.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.ghost:hover{border-color:var(--ink)}
+.small{padding:7px 12px;font-size:13px;border-radius:10px}
+
+.intro-list{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.intro-list li{display:flex;gap:12px;align-items:baseline}
+.intro-list .n{font-family:var(--f-mono);font-size:13px;color:var(--accent);min-width:22px}
+
+.panel{background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.roles{display:flex;flex-wrap:wrap;gap:8px}
+.role{background:var(--mark);color:var(--mark-ink);font-family:var(--f-display);font-weight:700;font-size:15px;padding:6px 12px;border-radius:8px}
+.role.second{background:var(--soft);color:var(--ink)}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.demo{font-size:14px;background:var(--soft);border-radius:12px;padding:10px 14px}
+ul.plain{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+
+.variant{background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.variant.picked{border-color:var(--accent);box-shadow:0 0 0 3px var(--soft)}
+.vtype{align-self:flex-start;font-family:var(--f-mono);font-size:12px;letter-spacing:.04em;padding:4px 8px;border-radius:6px;background:var(--soft);color:var(--ink)}
+.vtype.t2{background:var(--mark);color:var(--mark-ink)}
+.vtype.t3{background:var(--ink);color:var(--bg)}
+.why{font-size:14px;color:var(--muted);border-left:3px solid var(--mark);padding-left:12px}
+
+/* topic mix */
+.mixbar{display:flex;height:34px;border-radius:10px;overflow:hidden;gap:2px;background:var(--card)}
+.mixbar span{display:flex;align-items:center;justify-content:center;font-family:var(--f-mono);font-size:12px;font-weight:500;color:#fff;min-width:0;font-variant-numeric:tabular-nums}
+.mixbar span.c2{color:#17161F}
+.mixlist{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.mixlist li{display:grid;grid-template-columns:14px 48px 1fr;gap:4px 10px;align-items:baseline}
+.dot{width:12px;height:12px;border-radius:4px;align-self:center}
+.pct{font-family:var(--f-mono);font-weight:500;font-variant-numeric:tabular-nums}
+.mixlist b{display:block}
+.mixlist .what{font-size:14px;color:var(--muted)}
+.c1{background:var(--m1)}.c2{background:var(--m2)}.c3{background:var(--m3)}.c4{background:var(--m4)}.c5{background:var(--m5)}
+
+.kv{display:grid;grid-template-columns:130px 1fr;gap:8px 14px;font-size:15px;margin:0}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;min-width:0;overflow-wrap:anywhere}
+@media (max-width:460px){.kv{grid-template-columns:1fr;gap:2px}.kv dd{margin-bottom:8px}}
+.formula{font-size:18px;line-height:1.5;font-weight:500}
+
+/* tabs */
+.tabs{display:flex;gap:4px;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:4px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.tabs button{flex:1;padding:10px 6px;border-radius:10px;background:transparent;color:var(--muted);font-size:14px}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+
+/* profile mock */
+.profile{border:1.5px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--bg);min-width:0}
+.ph{display:flex;gap:16px;align-items:center}
+.ava{width:72px;height:72px;border-radius:50%;flex:none;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-family:var(--f-display);font-size:26px;font-weight:700;border:3px solid var(--card);box-shadow:0 0 0 2px var(--mark)}
+.stats{display:flex;gap:8px;font-size:12px;color:var(--muted);flex:1;justify-content:space-around;text-align:center;min-width:0}
+.stats b{display:block;color:var(--ink);font-size:16px}
+.pname{font-weight:700;font-size:15px}
+.bio{font-size:14px;line-height:1.5;white-space:pre-line;overflow-wrap:anywhere}
+.plink{font-size:14px;color:var(--accent);font-weight:700;overflow-wrap:anywhere}
+.follow{background:var(--accent);color:var(--accent-ink);text-align:center;border-radius:8px;padding:7px;font-weight:700;font-size:14px}
+.hls{display:flex;gap:12px;overflow-x:auto;padding-bottom:4px}
+.hl-item{display:flex;flex-direction:column;align-items:center;gap:4px;flex:none;width:64px}
+.hl-item i{width:56px;height:56px;border-radius:50%;border:2px solid var(--line);background:var(--card);display:grid;place-items:center;font-style:normal;font-family:var(--f-display);font-size:16px;color:var(--muted)}
+.hl-item span{font-size:11px;text-align:center;line-height:1.2;overflow-wrap:anywhere}
+.row{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.row>div{min-width:0;flex:1}
+.code{font-family:var(--f-mono);font-size:14px;background:var(--bg);border-radius:8px;padding:8px 10px;overflow-wrap:anywhere;white-space:pre-line}
+.chiprow{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:13px;border:1.5px solid var(--line);border-radius:99px;padding:3px 10px;font-family:var(--f-mono)}
+
+.items{display:flex;flex-direction:column;gap:12px;margin:0;padding:0;list-style:none}
+.items li{display:flex;flex-direction:column;gap:3px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.items li:last-child{border-bottom:0;padding-bottom:0}
+.items .sub{font-size:14px;color:var(--muted)}
+.hook{font-size:14px;background:var(--soft);border-radius:8px;padding:6px 10px;align-self:flex-start}
+
+.week{display:flex;flex-direction:column;gap:0;margin:0;padding:0;list-style:none}
+.week li{display:grid;grid-template-columns:40px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.week li:last-child{border-bottom:0}
+.week .d{font-family:var(--f-mono);font-weight:500;color:var(--accent)}
+.week .meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:2px}
+
+.check{display:flex;flex-direction:column;gap:8px}
+.check label{display:flex;gap:10px;align-items:flex-start;font-size:15px;cursor:pointer}
+.check input{margin-top:4px;accent-color:var(--accent);width:18px;height:18px;flex:none}
+.note{font-size:14px;color:var(--muted);border-left:3px solid var(--mark);padding-left:12px}
+.toast{font-size:14px;color:var(--accent);font-weight:700}
+.err{color:var(--warn);font-weight:700}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px}
+
+.loading{display:flex;flex-direction:column;align-items:flex-start;gap:16px;padding:28px 0}
+.dots{display:flex;gap:8px}
+.dots i{width:12px;height:12px;border-radius:50%;background:var(--accent);animation:b 1s infinite ease-in-out}
+.dots i:nth-child(2){animation-delay:.15s;background:var(--mark)}
+.dots i:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,80%,100%{transform:translateY(0);opacity:.5}40%{transform:translateY(-8px);opacity:1}}
+.cta{background:var(--ink);color:var(--bg);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.cta .btn{background:var(--mark);color:var(--mark-ink);align-self:flex-start}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="top" id="top" hidden>
+    <div class="steplabel" id="steplabel"></div>
+    <div class="bar"><i id="barfill"></i></div>
+  </div>
+  <main id="app"></main>
+</div>
+
+<script>
+/* ===== НАСТРОЙКИ: поменяй под себя ===== */
+const CONFIG = {
+  api: "/api/analyze",
+  demo: false,  // true = показывать пример разбора без запроса к серверу
+  // Блок в самом конце. Оставь ctaUrl пустым, чтобы его не показывать.
+  ctaTitle: "Хочешь, чтобы мы разобрали твой профиль лично?",
+  ctaText: "Посмотрим твой аккаунт и скажем, что поменять, чтобы люди подписывались.",
+  ctaButton: "Написать нам",
+  ctaUrl: ""   // например "https://t.me/username"
+};
+/* ======================================= */
+
+const ROLE_DESC = {
+  "Эксперт":"Ты разбираешься в теме и делишься знаниями, решениями, опытом. К тебе идут за пользой.",
+  "Наставник":"Ты ведёшь человека из точки А в точку Б: объясняешь, направляешь и поддерживаешь.",
+  "Практик":"Ты пробуешь на себе и показываешь реальный результат. Тебе верят, потому что видят, что работает.",
+  "Вдохновляющая личность":"Твоя жизнь, вкус, мысли и опыт. Люди смотрят, потому что хотят так же.",
+  "Интертейнер":"Ты создаёшь эмоции: юмор, приколы, тренды. С тобой просто весело."
+};
+
+const CHOICES = {
+  platforms:{multi:true, opts:["Instagram","TikTok","YouTube","Telegram","ВКонтакте"]},
+  camera:{multi:false, opts:["Говорю в камеру","Без лица, голосом","Текст и фото","Пока не знаю"]},
+  time:{multi:false, opts:["Пара часов в неделю","3-5 часов в неделю","Каждый день понемногу","Сколько угодно"]},
+  goalc:{multi:true, opts:["Реклама и охваты","Продавать свои услуги","Свой продукт или курс","Известность","Просто кайф"]}
+};
+
+const STEPS = ["intro","now","dig","you","loading","variants","packing","final"];
+const LABELS = {now:"Шаг 1 из 3 · Где ты сейчас",dig:"Шаг 2 из 3 · Копаемся в себе",you:"Шаг 3 из 3 · Какой ты и зачем блог",variants:"Твои варианты",final:"Твоя упаковка"};
+const PROGRESS = {now:1,dig:2,you:3,loading:3.5,variants:4,packing:4.5,final:5};
+
+const KEY = "positioning-ai-v2";
+const FRESH = () => ({step:0, a:{}, c:{}, result:null, pick:null, pack:null, packFor:null, tab:"pos", bioAlt:false, checks:{}, seen:[]});
+let S = FRESH();
+try{ const raw = localStorage.getItem(KEY); if(raw) S = Object.assign(S, JSON.parse(raw)); }catch(e){}
+if(STEPS[S.step]==="loading") S.step = S.result ? 5 : 3;
+if(STEPS[S.step]==="packing") S.step = 5;
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+
+const app = document.getElementById("app");
+const esc = s => String(s==null?"":s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const A = k => (S.a[k]||"").trim();
+
+function field(id, label, hint, ph, multi){
+  const val = esc(S.a[id]);
+  return `<div class="field"><label for="${id}">${label}</label>${hint?`<div class="hint">${hint}</div>`:""}
+    ${multi ? `<textarea id="${id}" data-k="${id}" placeholder="${esc(ph)}">${val}</textarea>`
+            : `<input type="text" id="${id}" data-k="${id}" placeholder="${esc(ph)}" value="${val}">`}</div>`;
+}
+function choice(id, label, hint){
+  const c = CHOICES[id], sel = S.c[id]||[];
+  return `<div class="field" role="group" aria-labelledby="l_${id}"><div class="label" id="l_${id}">${label}</div>${hint?`<div class="hint">${hint}</div>`:""}
+    <div class="pick">${c.opts.map((o,i)=>`<label><input type="${c.multi?"checkbox":"radio"}" name="${id}" id="${id}_${i}" data-c="${id}" value="${esc(o)}" ${sel.includes(o)?"checked":""}><span>${esc(o)}</span></label>`).join("")}</div></div>`;
+}
+const nav = (next, extra) => `<div class="nav"><button class="ghost" data-go="-1">Назад</button><button class="primary" ${extra||'data-go="1"'}>${next||"Дальше"}</button></div>`;
+
+function answers(){
+  const a = Object.assign({}, S.a);
+  a.platforms = (S.c.platforms||[]).join(", ");
+  a.camera = (S.c.camera||[]).join(", ");
+  a.time = (S.c.time||[]).join(", ");
+  a.goal = [(S.c.goalc||[]).join(", "), A("goal")].filter(Boolean).join(". ");
+  return a;
+}
+
+function mixBar(mix){
+  return `<div class="mixbar" role="img" aria-label="${esc(mix.map(m=>m.percent+"% "+m.topic).join(", "))}">${mix.map((m,i)=>`<span class="c${Math.min(i+1,5)}" style="flex:${Math.max(m.percent,1)}">${m.percent>=12?m.percent+"%":""}</span>`).join("")}</div>`;
+}
+function mixList(mix, withWhat){
+  return `<ul class="mixlist">${mix.map((m,i)=>`<li><i class="dot c${Math.min(i+1,5)}"></i><span class="pct">${m.percent}%</span><div><b>${esc(m.topic)}</b>${withWhat&&m.what?`<span class="what">${esc(m.what)}</span>`:""}</div></li>`).join("")}</ul>`;
+}
+
+/* ----- demo data, used only when CONFIG.demo is true ----- */
+const DEMO = {
+  summary:"Ты уже умеешь смешить: лучше всего у тебя заходят рофлы. А часами ты готова говорить про собак и про уход за волосами, в этом ты реально разбираешься. Юмор есть, знания есть, осталось правильно их смешать.",
+  strengths:["Чувство юмора, которое уже набирает просмотры","Свой опыт с собакой без кинолога","Разбираешься в уходе за волосами, друзья спрашивают советы"],
+  role:{main:"Интертейнер",second:"Практик",why:"С тобой весело, а то, о чём рассказываешь, ты пробовала на себе. Поэтому тебе будут и смеяться, и верить."},
+  variants:[
+    {type:"Ближе к тому, что есть",title:"Рофлы из обычной жизни",idea:"Юмор остаётся главным, но вместо всего подряд появляются постоянные темы, по которым тебя узнают.",mix:[{topic:"Рофлы про учёбу и друзей",percent:50,what:"Эксперименты и ситуации из моей шараги, в которых узнают себя"},{topic:"Жизнь со шпицем",percent:30,what:"Что он вытворяет, сколько он реально стоит, как я его воспитываю"},{topic:"Волосы и уход",percent:20,what:"Лёгкие советы через юмор, мои фавориты"}],audience:"ребятам 15-20, которые хотят поржать и узнать себя",value:"узнают себя, смеются и иногда берут полезное",why_you:"Рофлы у тебя уже залетают, ломать формат незачем, нужна система.",money:"Реклама у брендов для молодёжи: доставка, косметика, приложения."},
+    {type:"Смежный",title:"Волосы, собака и я",idea:"Главная тема польза про волосы, но подаёшь её по-своему, с юмором. Собака и жизнь делают блог живым.",mix:[{topic:"Уход за волосами",percent:50,what:"Разборы средств, укладки, ошибки в уходе"},{topic:"Жизнь с собакой",percent:30,what:"Груминг, уход за шерстью, смешные моменты"},{topic:"Моя жизнь и рофлы",percent:20,what:"Будни, учёба, ситуации из жизни"}],audience:"девчонкам 15-22, которые хотят красивые волосы без салона за 5 тысяч",value:"понятные советы по уходу, которые можно повторить дома, и хорошее настроение",why_you:"Друзья уже спрашивают тебя про волосы, а подача с юмором выделит тебя среди серьёзных бьюти-блогов.",money:"Реклама косметики для волос, свой гайд по уходу, позже консультации."},
+    {type:"Смелый",title:"Шпиц-блог с пользой",idea:"Делаешь блог про собак: уход, воспитание, вкусняшки и игрушки, но через свой юмор. Узкая тема, зато аудитория очень преданная.",mix:[{topic:"Уход за собакой",percent:40,what:"Шерсть, груминг дома, выбор корма"},{topic:"Воспитание без кинолога",percent:30,what:"Как я сама учила команды, ошибки первого года"},{topic:"Юмор про жизнь собачника",percent:30,what:"Честные истории и провалы первого года со шпицем"}],audience:"новым хозяевам маленьких собак, которые боятся сделать что-то не так",value:"советы без лекций, проверенные на своей собаке",why_you:"Ты воспитала собаку сама и можешь говорить про это часами. Пользы про собак много, а смешной пользы мало.",money:"Реклама зоотоваров и кормов, гайд для новых хозяев, партнёрки с зоомагазинами."}
+  ],
+  tip:"Перестань выкладывать всё подряд: если видео не про твои темы, лучше отправь его в близкие друзья."
+};
+const DEMO_PACK = {
+  formula:"Я Аня, которая разбирается в волосах и смеётся над жизнью. Показываю девчонкам 15-22, как ухаживать за волосами дома, а заодно живу с самым наглым шпицем. Со мной ты разберёшься в уходе и поржёшь.",
+  name_field:"Аня | уход за волосами",
+  usernames:["anya.volosy","anya_i_shpic","volosy.bez.salona"],
+  bio:"💇‍♀️ Уход за волосами без салона\n🐶 И жизнь с наглым шпицем\nПовторяй за мной, работает\n👇 Гайд по уходу бесплатно",
+  bio_alt:"Аня, 19 | волосы и рофлы\nПробую уход на себе и рассказываю честно\nИногда шпиц ворует эфир\n👇 Мои фавориты",
+  avatar:"Ты крупно по плечи, волосы хорошо видно, светлый фон. Улыбка, смотришь в камеру. Без собаки на аве, её оставь для актуальных.",
+  highlights:[{name:"Обо мне",what:"Кто ты, как пришла к уходу, 3-4 сторис"},{name:"Уход",what:"Твоя рутина и средства"},{name:"Отзывы",what:"Скрины, кому помогли советы"},{name:"Шпиц",what:"Лучшие моменты с собакой"},{name:"Фавориты",what:"Средства, которые советуешь, со ссылками"}],
+  link:"Бесплатный гайд «Уход за волосами дома за 10 минут» в Telegram-канале. Так подписчики переходят в канал.",
+  pinned:[{title:"Как я убила волосы и восстановила их",why:"Знакомит с тобой и показывает, что ты прошла это сама"},{title:"5 ошибок в уходе, которые делают все",why:"Самый полезный ролик, чтобы новенький сразу понял, зачем подписываться"},{title:"Шпиц пытается мне помочь с укладкой",why:"Показывает характер и юмор"}],
+  visual:"Светлые тёплые цвета, много естественного света. Обложки рилс с крупным текстом в одном стиле, лицо в кадре. Волосы всегда видно хорошо.",
+  pace:"3 ролика в неделю + сторис почти каждый день",
+  rubrics:[{name:"Проверяю на себе",topic:"Уход за волосами",what:"Берёшь средство или лайфхак, который все хвалят, неделю тестишь и показываешь честный итог",freq:"раз в неделю"},{name:"Мой косяк",topic:"Уход за волосами",what:"Ошибка, которую ты сама делала, как это выглядело и как исправила",freq:"раз в неделю"},{name:"Шпиц по чекам",topic:"Жизнь с собакой",what:"Сколько стоит и сколько сил уходит на маленькую собаку, честно и с юмором",freq:"раз в неделю"}],
+  week:[{day:"Пн",topic:"Уход за волосами",format:"рилс",idea:"Мой косяк: 2 года сушила волосы на максимуме, показываю фото до и после"},{day:"Вт",topic:"Моя жизнь и рофлы",format:"сторис",idea:"Опрос: какое средство для волос мне протестить на этой неделе"},{day:"Ср",topic:"Жизнь с собакой",format:"рилс",idea:"Сколько я потратила на шпица за первый год, по чекам"},{day:"Чт",topic:"Уход за волосами",format:"сторис",idea:"Показываю, как идёт тест средства, день 3"},{day:"Пт",topic:"Уход за волосами",format:"рилс",idea:"Проверяю на себе: маска, которую выбрали в опросе, итог недели"},{day:"Сб",topic:"Моя жизнь и рофлы",format:"сторис",idea:"Как я успеваю уход между парами, утро в реальном времени"},{day:"Вс",topic:"Отдых",format:"отдых",idea:"Отдыхаешь и собираешь идеи на следующую неделю"}],
+  first_videos:[{title:"Как я сожгла волосы и что сделала потом",hook:"«Год назад у меня на голове была мочалка, смотри»",why:"Личная история цепляет и сразу показывает, почему тебе можно верить"},{title:"5 ошибок в уходе, которые делаешь и ты",hook:"«Если ты моешь голову так, ты убиваешь волосы»",why:"Польза плюс небольшой шок, такое сохраняют и пересылают"},{title:"Сколько стоит маленькая собака на самом деле",hook:"«Мне говорили, шпиц — это недорого. Вот чеки за год»",why:"Цифры и честность цепляют даже тех, у кого нет собаки"},{title:"Повторяю укладку за 3000 рублей дома",hook:"«В салоне мне сказали 3000, делаю сама за 10 минут»",why:"Понятная выгода, хорошо залетает"},{title:"Неделю пользуюсь всем, что мне посоветуют в комментах",hook:"«Пишите, чем мне мыть голову. Попробую всё, что наберёт больше лайков»",why:"Вовлекает подписчиков и превращается в серию"}],
+  stories:["Утро: что делаю с волосами перед парами","Опрос: какая у тебя проблема с волосами","Шпиц в течение дня, коротко","Ответы на вопросы про уход раз в неделю","Распаковка новых средств"],
+  dont:["Не выкладывай рандомные тренды, не связанные с твоими темами","Не делай серьёзные лекции на 3 минуты: твоя сила в лёгкой подаче","Не рекламируй средства, которые сама не пробовала"],
+  first_steps:["Поменяй имя в профиле и шапку на новые","Сними и закрепи ролик про свою историю с волосами","Сделай 2 актуальных: «Обо мне» и «Уход»"]
+};
+
+function render(){
+  const name = STEPS[S.step];
+  app.innerHTML = VIEWS[name]();
+  const top = document.getElementById("top");
+  if(name==="intro"){ top.hidden = true; }
+  else{
+    top.hidden = false;
+    document.getElementById("steplabel").textContent = LABELS[name] || "Работаю над разбором";
+    document.getElementById("barfill").style.width = (PROGRESS[name]/5*100)+"%";
+  }
+  window.scrollTo(0,0);
+}
+const go = n => { S.step = STEPS.indexOf(n); save(); render(); };
+
+const VIEWS = {
+  intro:()=>`<section class="screen">
+    <h1>Найди своё <span class="hl">позиционирование</span></h1>
+    <p class="lead">Ответь на вопросы о себе своими словами. Нейросеть разберёт ответы, предложит 3 варианта блога и соберёт под выбранный полную упаковку профиля.</p>
+    <ol class="intro-list">
+      <li><span class="n">01</span><span>Где ты сейчас и что уже заходит</span></li>
+      <li><span class="n">02</span><span>Что ты любишь, умеешь и о чём можешь говорить часами</span></li>
+      <li><span class="n">03</span><span>Какой ты и чего хочешь от блога</span></li>
+      <li><span class="n">04</span><span>3 варианта: твоя роль и микс тем в процентах</span></li>
+      <li><span class="n">05</span><span>Упаковка: имя, шапка, аватарка, актуальные, рубрики, план на неделю и первые 5 роликов</span></li>
+    </ol>
+    <p class="hint">Займёт минут 10. Чем подробнее ответишь, тем точнее разбор. Ответы сохраняются в этом браузере, можно закрыть и вернуться.</p>
+    <div class="nav"><span></span><button class="primary" data-go="1">Начать</button></div>
+  </section>`,
+
+  now:()=>`<section class="screen">
+    <h2>Где ты сейчас</h2>
+    ${field("name","Как тебя зовут?","","Аня")}
+    ${field("age","Сколько тебе лет?","Нужно, чтобы подобрать подачу и аудиторию","19")}
+    ${choice("platforms","Где ведёшь или хочешь вести блог?","Можно несколько")}
+    ${field("now","О чём твой блог сейчас и что ты снимаешь?","Тема и формат: рофлы, влоги, советы, тренды. Если пока ничего не ведёшь или выкладываешь всё подряд, так и пиши","снимаю рофлы про учёбу и друзей, иногда тренды",true)}
+    ${field("worked","Что из выложенного зашло лучше всего?","Больше всего просмотров, комментов, сохранений. Если блога нет, пропусти","видео «типы людей на паре» набрало 40к, остальное по 500",true)}
+    ${nav()}
+  </section>`,
+
+  dig:()=>`<section class="screen">
+    <h2>Копаемся в себе</h2>
+    <p class="lead">Темы для блога почти всегда уже есть в твоей жизни. Пиши всё, что приходит в голову, даже если кажется, что это не для блога.</p>
+    ${field("hours","О чём ты можешь говорить часами?","Без подготовки, хоть ночью разбуди. Можно несколько тем","про собак, у меня шпиц; про уход за волосами, перепробовала кучу всего",true)}
+    ${field("friends","О чём тебя чаще всего спрашивают друзья?","","какую маску для волос взять, как я монтирую видео",true)}
+    ${field("spend","На что ты тратишь время и деньги просто для себя?","","косметика для волос, игрушки для собаки, сериалы",true)}
+    ${field("skill","Что ты умеешь лучше других или через что уже прошёл(а)?","Навыки, опыт, история, которой можешь поделиться","восстановила волосы после осветления, сама воспитала собаку без кинолога",true)}
+    ${nav()}
+  </section>`,
+
+  you:()=>`<section class="screen">
+    <h2>Какой ты и зачем тебе блог</h2>
+    ${field("character","Какой(ая) ты в жизни? 3-5 слов","Как сказали бы друзья","смешная, громкая, немного хаотичная, добрая")}
+    ${choice("camera","Как тебе комфортнее снимать?","")}
+    ${choice("time","Сколько времени готов(а) тратить на блог?","")}
+    ${field("audience","Кого ты хочешь видеть у себя в подписчиках?","Возраст, интересы, чем живут","девчонок 15-22, которым интересно выглядеть красиво и поржать",true)}
+    ${choice("goalc","Чего ты хочешь от блога?","Можно несколько")}
+    ${field("goal","Если хочешь, расскажи про цель подробнее","Необязательно","хочу набрать 10к и брать рекламу, потом может свой гайд",true)}
+    ${field("idols","Каких блогеров смотришь или на кого хочешь быть похож(а)?","Необязательно","")}
+    <p class="err" id="err" hidden></p>
+    ${nav("Разобрать мои ответы",'id="analyze"')}
+  </section>`,
+
+  loading:()=>loader("Читаю твои ответы…","Обычно 15-40 секунд. Не закрывай страницу."),
+  packing:()=>loader("Собираю упаковку…","Это самая объёмная часть, может занять до минуты."),
+
+  variants:()=>{
+    const r = S.result; if(!r) return VIEWS.you();
+    const types = ["t1","t2","t3"];
+    return `<section class="screen">
+    ${r._demo?`<p class="demo">Это пример разбора. На твоём сайте тут будет настоящий разбор ответов участника.</p>`:""}
+    <h1>Вот что <span class="hl">я вижу</span></h1>
+    <p class="lead">${esc(r.summary)}</p>
+    ${r.strengths&&r.strengths.length?`<div class="panel"><div class="eyebrow">Твои сильные стороны</div><ul class="plain">${r.strengths.map(s=>`<li>${esc(s)}</li>`).join("")}</ul></div>`:""}
+    <div class="panel">
+      <div class="eyebrow">Твоя роль в блоге</div>
+      <div class="roles"><span class="role">${esc(r.role.main)}</span>${r.role.second?`<span class="role second">${esc(r.role.second)}</span>`:""}</div>
+      ${r.role.why?`<p>${esc(r.role.why)}</p>`:""}
+      ${ROLE_DESC[r.role.main]?`<p class="hint"><b>${esc(r.role.main)}.</b> ${ROLE_DESC[r.role.main]}</p>`:""}
+    </div>
+    <h2>3 варианта для тебя</h2>
+    <p class="hint">Блог почти никогда не про одну тему. Это микс: главная тема даёт пользу и причину подписаться, остальные показывают тебя как человека. Выбери вариант, от которого внутри «о, да».</p>
+    ${r.variants.map((v,i)=>`<article class="variant ${S.pick===i?"picked":""}">
+      <span class="vtype ${types[i]||"t1"}">${esc(v.type||("Вариант "+(i+1)))}</span>
+      <h3>${esc(v.title)}</h3>
+      <p>${esc(v.idea)}</p>
+      ${mixBar(v.mix)}
+      ${mixList(v.mix, true)}
+      <dl class="kv">
+        ${v.audience?`<dt>Для кого</dt><dd>${esc(v.audience)}</dd>`:""}
+        ${v.value?`<dt>Что получают</dt><dd>${esc(v.value)}</dd>`:""}
+        ${v.money?`<dt>Как зарабатывать</dt><dd>${esc(v.money)}</dd>`:""}
+      </dl>
+      ${v.why_you?`<p class="why">${esc(v.why_you)}</p>`:""}
+      <div><button class="${S.pick===i?"primary":"ghost"}" data-pick="${i}">${S.pick===i?"Выбран":"Выбрать этот"}</button></div>
+    </article>`).join("")}
+    ${r.tip?`<p class="note"><b>И ещё:</b> ${esc(r.tip)}</p>`:""}
+    <p class="err" id="err" hidden></p>
+    <div class="nav">
+      <button class="ghost" id="more">Предложить другие варианты</button>
+      <button class="primary" id="topack" ${S.pick==null?"disabled":""}>Собрать упаковку</button>
+    </div>
+    <div class="nav" style="padding-top:0"><button class="ghost small" id="edit">Поправить ответы</button></div>
+  </section>`;},
+
+  final:()=>{
+    const r = S.result, v = r && r.variants[S.pick], p = S.pack;
+    if(!v || !p) return VIEWS.variants();
+    return `<section class="screen">
+    ${p._demo?`<p class="demo">Это пример упаковки. На твоём сайте здесь будет упаковка под ответы участника.</p>`:""}
+    <div class="eyebrow">Твоё направление</div>
+    <h1>${esc(v.title)}</h1>
+    <div class="panel"><div class="eyebrow">Позиционирование одной фразой</div><p class="formula">${esc(p.formula)}</p></div>
+    <div class="tabs" role="tablist">
+      ${[["pos","Позиционирование"],["prof","Профиль"],["cont","Контент"]].map(([k,l])=>`<button role="tab" aria-selected="${S.tab===k}" data-tab="${k}">${l}</button>`).join("")}
+    </div>
+    ${S.tab==="pos"?tabPos(r,v,p):S.tab==="prof"?tabProf(v,p):tabCont(v,p)}
+    <div class="nav" style="justify-content:flex-start">
+      <button class="primary" id="copyall">Скопировать всё</button>
+      <button class="ghost" id="back">Другие варианты</button>
+      <button class="ghost" id="repack">Пересобрать упаковку</button>
+    </div>
+    <span class="toast" id="toast" aria-live="polite"></span>
+    <textarea id="copyarea" hidden readonly></textarea>
+    <p class="err" id="err" hidden></p>
+    ${CONFIG.ctaUrl?`<div class="cta"><h3>${esc(CONFIG.ctaTitle)}</h3><p>${esc(CONFIG.ctaText)}</p><a class="btn" href="${esc(CONFIG.ctaUrl)}" target="_blank" rel="noopener">${esc(CONFIG.ctaButton)}</a></div>`:""}
+    <div class="confirm" id="resetbox"><button class="ghost small" id="reset">Начать заново</button></div>
+  </section>`;}
+};
+
+function loader(title, sub){
+  return `<section class="screen"><div class="loading"><div class="dots"><i></i><i></i><i></i></div><h2 id="lt">${title}</h2><p class="lead">${sub}</p></div></section>`;
+}
+
+function tabPos(r,v,p){
+  return `<div class="panel">
+      <div class="eyebrow">Роль</div>
+      <div class="roles"><span class="role">${esc(r.role.main)}</span>${r.role.second?`<span class="role second">${esc(r.role.second)}</span>`:""}</div>
+      ${ROLE_DESC[r.role.main]?`<p class="hint">${ROLE_DESC[r.role.main]}</p>`:""}
+    </div>
+    <div class="panel">
+      <div class="eyebrow">Микс тем</div>
+      ${mixBar(v.mix)}${mixList(v.mix,true)}
+      <p class="hint">Примерно столько контента из 10 публикаций должно быть про каждую тему. Например, при 50% это 5 из 10.</p>
+    </div>
+    <div class="panel"><dl class="kv">
+      <dt>Для кого</dt><dd>${esc(v.audience)}</dd>
+      <dt>Что получают</dt><dd>${esc(v.value)}</dd>
+      ${v.money?`<dt>Как зарабатывать</dt><dd>${esc(v.money)}</dd>`:""}
+    </dl></div>
+    ${p.first_steps.length?`<div class="panel"><h3>Что сделать сегодня</h3><div class="check">${p.first_steps.map((s,i)=>chk("fs"+i,s)).join("")}</div></div>`:""}
+    ${p.dont.length?`<div class="panel"><h3>Чего не делать</h3><ul class="plain">${p.dont.map(s=>`<li>${esc(s)}</li>`).join("")}</ul></div>`:""}`;
+}
+
+function tabProf(v,p){
+  const name = A("name") || "Я";
+  const bio = S.bioAlt && p.bio_alt ? p.bio_alt : p.bio;
+  const nick = p.usernames[0] || "nickname";
+  return `<div class="panel">
+      <div class="eyebrow">Так будет выглядеть твой профиль</div>
+      <div class="profile" aria-label="Макет профиля">
+        <div class="code" style="background:transparent;padding:0;font-weight:500">@${esc(nick)}</div>
+        <div class="ph"><div class="ava">${esc(name.charAt(0).toUpperCase())}</div>
+          <div class="stats"><span><b>0</b>публикаций</span><span><b>…</b>подписчиков</span><span><b>…</b>подписок</span></div></div>
+        <div><div class="pname">${esc(p.name_field)}</div><div class="bio">${esc(bio)}</div>${p.link?`<div class="plink">ссылка ↗</div>`:""}</div>
+        <div class="follow">Подписаться</div>
+        ${p.highlights.length?`<div class="hls">${p.highlights.map(h=>`<div class="hl-item"><i>${esc(h.name.charAt(0).toUpperCase())}</i><span>${esc(h.name)}</span></div>`).join("")}</div>`:""}
+      </div>
+      ${p.bio_alt?`<div class="nav" style="padding:0;justify-content:flex-start"><button class="ghost small" id="bioswap">${S.bioAlt?"Показать вариант 1":"Показать вариант 2 шапки"}</button></div>`:""}
+    </div>
+    <div class="panel">
+      <div class="row"><div><div class="eyebrow">Поле «Имя»</div><p class="hint">По нему тебя находят в поиске, поэтому тут не только имя, но и тема</p></div><button class="ghost small" data-copy="name_field">Скопировать</button></div>
+      <div class="code">${esc(p.name_field)}</div>
+    </div>
+    <div class="panel">
+      <div class="row"><div><div class="eyebrow">Шапка, вариант 1</div></div><button class="ghost small" data-copy="bio">Скопировать</button></div>
+      <div class="code">${esc(p.bio)}</div>
+      ${p.bio_alt?`<div class="row"><div><div class="eyebrow">Шапка, вариант 2</div></div><button class="ghost small" data-copy="bio_alt">Скопировать</button></div><div class="code">${esc(p.bio_alt)}</div>`:""}
+    </div>
+    ${p.usernames.length?`<div class="panel"><div class="eyebrow">Варианты ника</div><div class="chiprow">${p.usernames.map(u=>`<span class="tag">@${esc(u)}</span>`).join("")}</div><p class="hint">Короткий, легко прочитать и запомнить. Без лишних цифр и точек подряд.</p></div>`:""}
+    ${p.avatar?`<div class="panel"><div class="eyebrow">Аватарка</div><p>${esc(p.avatar)}</p></div>`:""}
+    ${p.highlights.length?`<div class="panel"><div class="eyebrow">Актуальные</div><ul class="items">${p.highlights.map(h=>`<li><b>${esc(h.name)}</b><span class="sub">${esc(h.what)}</span></li>`).join("")}</ul></div>`:""}
+    ${p.link?`<div class="panel"><div class="eyebrow">Ссылка в профиле</div><p>${esc(p.link)}</p></div>`:""}
+    ${p.pinned.length?`<div class="panel"><div class="eyebrow">Закрепить 3 публикации</div><ul class="items">${p.pinned.map((x,i)=>`<li><b>${i+1}. ${esc(x.title)}</b><span class="sub">${esc(x.why)}</span></li>`).join("")}</ul></div>`:""}
+    ${p.visual?`<div class="panel"><div class="eyebrow">Визуал</div><p>${esc(p.visual)}</p></div>`:""}
+    <div class="panel"><h3>Проверь профиль</h3><div class="check">${[
+      "Аватарка: видно лицо, понятно, что это живой человек",
+      "Поле «Имя»: есть тема, а не только имя",
+      "Шапка: за 5 секунд понятно, кто ты, про что тут и зачем подписываться",
+      "Актуальные: отвечают на вопросы новичка, без непонятных смайликов",
+      "Последние 9 публикаций: видно твои темы, нет каши"
+    ].map((c,i)=>chk("pc"+i,c)).join("")}</div>
+    <p class="note">Покажи профиль 2-3 знакомым, которые не знают тебя как блогера. Если за 5 секунд они поняли, кто ты и зачем подписываться, значит всё получилось.</p></div>`;
+}
+
+function tabCont(v,p){
+  const colorOf = t => { const i = v.mix.findIndex(m=>m.topic.toLowerCase()===String(t||"").toLowerCase()); return i<0?"":`<i class="dot c${Math.min(i+1,5)}" style="display:inline-block;margin-right:6px"></i>`; };
+  return `${p.pace?`<div class="panel"><div class="eyebrow">Твой ритм</div><p class="formula">${esc(p.pace)}</p><p class="hint">Посчитано под время, которое ты готов(а) тратить. Лучше стабильно так, чем неделю каждый день и потом пропасть на месяц.</p></div>`:""}
+    ${p.rubrics.length?`<div class="panel"><div class="eyebrow">Постоянные рубрики</div><p class="hint">По рубрикам тебя узнают и ждут. Плюс не надо каждый раз придумывать, что снять.</p><ul class="items">${p.rubrics.map(x=>`<li><b>${esc(x.name)}</b><span class="sub">${colorOf(x.topic)}${esc(x.topic)} · ${esc(x.freq)}</span><span>${esc(x.what)}</span></li>`).join("")}</ul></div>`:""}
+    ${p.week.length?`<div class="panel"><div class="eyebrow">План на первую неделю</div><ul class="week">${p.week.map(w=>`<li><span class="d">${esc(w.day)}</span><div><div class="meta">${colorOf(w.topic)}<span class="hint">${esc(w.topic)} · ${esc(w.format)}</span></div>${esc(w.idea)}</div></li>`).join("")}</ul></div>`:""}
+    ${p.first_videos.length?`<div class="panel"><div class="eyebrow">Первые 5 роликов</div><ul class="items">${p.first_videos.map((x,i)=>`<li><b>${i+1}. ${esc(x.title)}</b>${x.hook?`<span class="hook">Начало: ${esc(x.hook)}</span>`:""}<span class="sub">${esc(x.why)}</span></li>`).join("")}</ul></div>`:""}
+    ${p.stories.length?`<div class="panel"><div class="eyebrow">Идеи для сторис</div><ul class="plain">${p.stories.map(s=>`<li>${esc(s)}</li>`).join("")}</ul></div>`:""}`;
+}
+
+const chk = (id, text) => `<label><input type="checkbox" id="ck_${id}" data-ch="${id}" ${S.checks[id]?"checked":""}><span>${esc(text)}</span></label>`;
+
+function buildCopy(){
+  const r = S.result, v = r.variants[S.pick], p = S.pack;
+  const L = [];
+  L.push("МОЁ ПОЗИЦИОНИРОВАНИЕ","", "Направление: "+v.title, "Роль: "+r.role.main+(r.role.second?" + "+r.role.second:""), "", "Одной фразой:", p.formula, "");
+  L.push("Микс тем:", ...v.mix.map(m=>`${m.percent}% ${m.topic}${m.what?" — "+m.what:""}`), "");
+  L.push("Для кого: "+v.audience, "Что получают: "+v.value); if(v.money) L.push("Как зарабатывать: "+v.money); L.push("");
+  L.push("УПАКОВКА ПРОФИЛЯ","", "Имя в профиле: "+p.name_field, "Ники: "+p.usernames.map(u=>"@"+u).join(", "), "", "Шапка, вариант 1:", p.bio, "");
+  if(p.bio_alt) L.push("Шапка, вариант 2:", p.bio_alt, "");
+  if(p.avatar) L.push("Аватарка: "+p.avatar);
+  if(p.link) L.push("Ссылка: "+p.link);
+  if(p.highlights.length) L.push("", "Актуальные:", ...p.highlights.map(h=>`- ${h.name}: ${h.what}`));
+  if(p.pinned.length) L.push("", "Закрепить:", ...p.pinned.map((x,i)=>`${i+1}. ${x.title} (${x.why})`));
+  if(p.visual) L.push("", "Визуал: "+p.visual);
+  L.push("", "КОНТЕНТ"); if(p.pace) L.push("Ритм: "+p.pace);
+  if(p.rubrics.length) L.push("", "Рубрики:", ...p.rubrics.map(x=>`- ${x.name} (${x.topic}, ${x.freq}): ${x.what}`));
+  if(p.week.length) L.push("", "План на неделю:", ...p.week.map(w=>`${w.day} — ${w.format}, ${w.topic}: ${w.idea}`));
+  if(p.first_videos.length) L.push("", "Первые ролики:", ...p.first_videos.map((x,i)=>`${i+1}. ${x.title}\n   Начало: ${x.hook}`));
+  if(p.stories.length) L.push("", "Сторис:", ...p.stories.map(s=>"- "+s));
+  if(p.dont.length) L.push("", "Не делать:", ...p.dont.map(s=>"- "+s));
+  if(p.first_steps.length) L.push("", "Сделать сегодня:", ...p.first_steps.map(s=>"- "+s));
+  return L.join("\n");
+}
+
+function copyText(text){
+  const toast = document.getElementById("toast");
+  const fallback = ()=>{ const ta=document.getElementById("copyarea"); ta.hidden=false; ta.value=text; ta.style.minHeight="240px"; ta.focus(); ta.select(); if(toast) toast.textContent="Выдели текст и скопируй"; };
+  try{ navigator.clipboard.writeText(text).then(()=>{ if(toast){ toast.textContent="Скопировано"; setTimeout(()=>{toast.textContent=""},2000);} }, fallback); }catch(err){ fallback(); }
+}
+
+const PHRASES = {
+  loading:["Читаю твои ответы…","Ищу, где пересекается то, что ты делаешь и что любишь…","Подбираю роль…","Смешиваю темы в пропорциях…","Собираю 3 варианта…"],
+  packing:["Собираю упаковку…","Придумываю имя профиля и шапку…","Раскладываю актуальные…","Расписываю план на неделю…","Придумываю первые ролики…"]
+};
+let phraseTimer = null;
+function startPhrases(kind){
+  let i = 0; clearInterval(phraseTimer);
+  phraseTimer = setInterval(()=>{ const el=document.getElementById("lt"); if(el){ i=(i+1)%PHRASES[kind].length; el.textContent=PHRASES[kind][i]; } }, 4000);
+}
+async function call(payload){
+  if(CONFIG.demo){
+    await new Promise(r=>setTimeout(r,1500));
+    return {ok:true, data: payload.mode==="pack" ? Object.assign({_demo:true}, DEMO_PACK) : Object.assign({_demo:true}, DEMO)};
+  }
+  try{
+    const r = await fetch(CONFIG.api, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload)});
+    const data = await r.json().catch(()=>null);
+    if(r.ok && data) return {ok:true, data};
+    if(data && data.error==="too_empty") return {ok:false, msg:"Ответь хотя бы на пару вопросов, иначе разбирать нечего."};
+    return {ok:false, msg:"Не получилось сделать разбор. Попробуй ещё раз через минуту."};
+  }catch(e){ return {ok:false, msg:"Нет связи с сервером. Проверь интернет и попробуй ещё раз."}; }
+}
+function showErr(msg){ const el = document.getElementById("err"); if(el){ el.textContent = msg; el.hidden = false; el.scrollIntoView({block:"center"}); } }
+
+async function analyze(avoid){
+  const prev = S.step;
+  go("loading"); startPhrases("loading");
+  const res = await call({mode:"variants", answers:answers(), avoid});
+  clearInterval(phraseTimer);
+  if(res.ok && Array.isArray(res.data.variants) && res.data.variants.length){
+    S.result = res.data; S.pick = null; S.pack = null; S.packFor = null;
+    S.seen = (S.seen||[]).concat(res.data.variants.map(v=>v.title)).slice(-6);
+    go("variants");
+  }else{ S.step = prev; save(); render(); showErr(res.ok?"Не получилось сделать разбор. Попробуй ещё раз.":res.msg); }
+}
+async function pack(force){
+  const v = S.result.variants[S.pick];
+  if(!force && S.pack && S.packFor===v.title){ S.tab="pos"; go("final"); return; }
+  const prev = S.step;
+  go("packing"); startPhrases("packing");
+  const res = await call({mode:"pack", answers:answers(), variant:v, role:S.result.role});
+  clearInterval(phraseTimer);
+  if(res.ok && res.data && res.data.bio){
+    S.pack = res.data; S.packFor = v.title; S.tab = "pos"; S.bioAlt = false;
+    go("final");
+  }else{ S.step = prev; save(); render(); showErr(res.ok?"Не получилось собрать упаковку. Попробуй ещё раз.":res.msg); }
+}
+
+app.addEventListener("input", e=>{ const k = e.target.dataset.k; if(k){ S.a[k] = e.target.value; save(); } });
+app.addEventListener("change", e=>{
+  const t = e.target;
+  if(t.dataset.ch!==undefined){ S.checks[t.dataset.ch]=t.checked; save(); }
+  if(t.dataset.c){ const id=t.dataset.c; S.c[id] = Array.from(app.querySelectorAll(`input[data-c="${id}"]:checked`)).map(x=>x.value); save(); }
+});
+app.addEventListener("click", e=>{
+  const t = e.target.closest("button"); if(!t) return;
+  if(t.dataset.go){ S.step = Math.max(0, Math.min(3, S.step + Number(t.dataset.go))); save(); render(); return; }
+  if(t.dataset.pick!==undefined){
+    S.pick = Number(t.dataset.pick); save(); render();
+    const el = document.querySelectorAll(".variant")[S.pick]; if(el) el.scrollIntoView({block:"center"}); return;
+  }
+  if(t.dataset.tab){ S.tab = t.dataset.tab; save(); render(); document.querySelector(".tabs").scrollIntoView({block:"start"}); return; }
+  if(t.dataset.copy){ copyText(S.pack[t.dataset.copy]||""); return; }
+  switch(t.id){
+    case "analyze": S.seen = []; analyze([]); break;
+    case "more": analyze(S.seen||[]); break;
+    case "topack": if(S.pick!=null) pack(false); break;
+    case "repack": pack(true); break;
+    case "edit": go("now"); break;
+    case "back": go("variants"); break;
+    case "bioswap": S.bioAlt = !S.bioAlt; save(); render(); document.querySelector(".tabs").scrollIntoView({block:"start"}); break;
+    case "copyall": copyText(buildCopy()); break;
+    case "reset": document.getElementById("resetbox").innerHTML = `<span>Точно стереть все ответы?</span><button class="ghost small" id="resetyes">Да, стереть</button><button class="ghost small" id="resetno">Нет</button>`; break;
+    case "resetno": document.getElementById("resetbox").innerHTML = `<button class="ghost small" id="reset">Начать заново</button>`; break;
+    case "resetyes": S = FRESH(); save(); render(); break;
+  }
+});
+
+render();
+</script>
+
+</body></html>
